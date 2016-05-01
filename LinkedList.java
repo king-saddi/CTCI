@@ -1,134 +1,230 @@
+import java.util.HashSet;
+
+// Java program to remove duplicates from unsorted linked list
+ 
 class LinkedList {
-
-    static Node head;
-
+ 
+    Node head;
+ 
     static class Node {
-
+ 
         int data;
         Node next;
-
+ 
         Node(int d) {
             data = d;
             next = null;
         }
     }
-
-    /* Function to remove duplicates from a unsorted linked list */
-    void remove_duplicates() {
-        Node ptr1 = null, ptr2 = null, dup = null;
-        ptr1 = head;
-
-        /* Pick elements one by one */
-        while (ptr1 != null && ptr1.next != null) {
-            ptr2 = ptr1;
-
-            /* Compare the picked element with rest of the elements */
-            while (ptr2.next != null) {
-
-                /* If duplicate then delete it */
-                if (ptr1.data == ptr2.next.data) {
-
-                    /* sequence of steps is important here */
-                    dup = ptr2.next;
-                    ptr2.next = ptr2.next.next;
-                    System.gc();
-                } else /* This is tricky */ {
-                    ptr2 = ptr2.next;
-                }
-            }
-            ptr1 = ptr1.next;
-        }
+ 
+     /* Function to remove duplicates from a unsorted linked list */
+    static void remove_duplicates(Node n) {
+    	HashSet<Integer> set = new HashSet<Integer>();
+    	Node previous = null;
+    	while(n != null){
+    		if(set.contains(n.data)){
+    			previous.next = n.next;
+    		}
+    		else{
+    			set.add(n.data);
+    			previous = n;
+    		}
+    		
+    		n=n.next;
+    	}
     }
+ 
+    public int kthToLast(Node n, int k){
+    	int length = 0;
+    	Node top = n;
+    	while(n != null){
+    		length++;
+    		n = n.next;
+    	}
+    	n = top;
+    	
+    	int kth = length -k;
+    	for(int j =0; j<kth; j++){
+    		n = n.next;
+    	}
+    	return n.data;
+    }
+    
+    public static void deleteNode(Node n){
+    	n.data = n.next.data;
+    	n.next = n.next.next;
+    }
+    
+    public static Node partition(Node n, int partition){
+    	Node left = new Node(0);
+    	Node placeHolderLeft = left;
+    	Node right = new Node(0);
+    	Node placeHolderRight = right;
+    	
+    	while(n != null){
+    		if(n.data < partition){
+    			left.next = new Node(n.data);
+    			left = left.next;
+    		}
+    		else{
+    			right.next = new Node(n.data);
+    			right = right.next;
+    		} 		
+    		n = n.next;
+    	}
+    	left.next = placeHolderRight.next;
+    	
+    	return placeHolderLeft.next;
+    	
+    	
+    }
+    
+    public static Node sumLists(Node a, Node b){
+    	
+    	Node result = new Node(0);
+    	Node placeHolder = result;
+    	int carry = 0;
+    	int sum = 0;
+    	while((a != null) || (b != null)){
+    		if (a == null){
+    			sum = b.data + carry;
+    			b = b.next;
+    		}
+    		else if (b == null){
+    			sum = a.data + carry;
+    			a = a.next;
+    		}
+    		else{
+    			sum = a.data + b.data + carry;
+    			a = a.next;
+    			b = b.next;
+    		}
+    		
+			if (sum>=10){
+				int append = sum %10;
+				result.next = new Node(append);
+				result = result.next;
+				carry = 1;
+			}
+			else{
+				result.next = new Node(sum);
+				result = result.next;
+				carry = 0;
+			}
+			
+			
+    	}
+    	if(carry == 1){
+    		result.next = new Node(carry);
+    	}
 
-    void printList(Node node) {
+    	return placeHolder.next;
+    }
+    
+    public static boolean palindrome(Node node){
+    	Node opposite = null;
+    	Node placeHolder = node;
+    	
+    	while(node != null){
+    		Node temp =opposite;
+    		opposite = new Node(node.data);
+    		opposite.next = temp;
+    		
+    		node = node.next;
+    	}
+    	
+    	while(placeHolder != null){
+    		if(placeHolder.data == opposite.data){
+    			placeHolder = placeHolder.next;
+    			opposite = opposite.next;
+    		}
+    		else
+    			return false;
+    	}
+    	
+    	return true;
+    }
+/*  //Unoptimal O(A+B) 
+    public static Node intersection(Node a, Node b){
+    	Node temp = b;
+    	while(a != null){
+    		while(b != null){
+    			if(a == b){
+    				return a;
+    			}
+    			else b = b.next;
+    		}
+    		a = a.next;
+    		b = temp;
+    	}
+    	
+    	return null;
+    }
+*/
+    
+    // works if there is no circular list as input,
+    // more optimal than above: O(A+B)
+    public static Node intersection(Node a, Node b){
+    	HashSet<Node> match = new HashSet<Node>();
+    	while(a != null){
+    		match.add(a);
+    		a = a.next;
+    	}
+    	
+    	while(b != null){
+    		if (match.contains(b)){
+    			return b;
+    		}
+    		else {
+    			match.add(b);
+    		};
+    		b = b.next;
+    	}
+    	
+    	return null;
+    }
+    public static int circular(Node a){
+    	
+    	Node slow = a.next;
+    	Node fast = a.next.next;
+    	while(fast != null){
+    		if(slow == fast){
+    			break;
+    		}
+    		else{
+    			slow = slow.next;
+    			fast = fast.next.next;
+    		}
+    	}
+    	
+    	// not a circular loop input
+    	if (fast == null){
+    		return 0;
+    	}
+    	
+    	slow = a;
+    	while(slow != null){
+    		if (slow == fast){
+    			return fast.data;
+    		}
+    		else{
+    			slow = slow.next;
+    			fast = fast.next;
+    		}
+    	}
+    	
+    	return 0;
+    	
+    }
+    
+    
+    public static void printList(Node node) {
         while (node != null) {
             System.out.print(node.data + " ");
             node = node.next;
         }
     }
-    
-    public static int nthLast(Node list, int n){
-    	int length = 0;
-    	Node tmp = null;
-    	tmp = list;
-    	
-    	while(tmp != null){
-    		length++;
-    		tmp = tmp.next;
-    	}
-    
-
-    	int nth = length -n;
-    	for(int j =0; j<nth; j++){
-    		list = list.next;
-    	}
-    	
-    	System.out.println(list.data);
-    		return list.data;
-    }
-    
-    public static void delete(Node c){
-    	if(c == null || c.next == null)
-    		System.out.println("Can not delete the last node in a linked list");
-    	else{
-    	c.data = c.next.data;
-    	
-    	c.next = c.next.next;
-    	}
-    }
-
-    static Node addTwoLists(Node first, Node second) {
-        Node res = null; // res is head node of the resultant list
-        Node prev = null;
-        Node temp = null;
-        int carry = 0;
-        int sum = 0;
  
-        while (first != null || second != null) //while both lists exist
-        {
-           
-        	if(first != null){
-        		sum = sum + first.data;
-        	}
-        	if(second != null){
-        		sum = sum + second.data;
-        	}
- 
-            sum = sum + carry;
-            System.out.println(sum);
-            carry = (sum >= 10) ? 1 : 0;
-            sum = sum % 10;
- 
-            // Create a new node with sum as data
-            temp = new Node(sum);
-            sum = 0;
-            if (res == null) {
-                res = temp;
-            } else 
-            {
-                prev.next = temp;
-            }
-            prev = temp;
- 
-            // Move first and second pointers to next nodes
-            if (first != null) {
-                first = first.next;
-            }
-            if (second != null) {
-                second = second.next;
-            }
-            
-        }
- 
-        if (carry > 0) {
-            temp.next = new Node(carry);
-        }
- 
-        // return head of the resultant list
-        return res;
-    }
-    
-    
     public static void main(String[] args) {
         LinkedList list = new LinkedList();
         list.head = new Node(10);
@@ -138,33 +234,68 @@ class LinkedList {
         list.head.next.next.next.next = new Node(12);
         list.head.next.next.next.next.next = new Node(11);
         list.head.next.next.next.next.next.next = new Node(10);
-
-        
-        
+ 
         System.out.println("Linked List before removing duplicates ");
-        list.printList(head);
-        list.remove_duplicates();
+        printList(list.head);
+        System.out.println();
+        System.out.println("The kth to last element is: " + list.kthToLast(list.head, 7));
         System.out.println("");
         System.out.println("Linked List after removing duplicates");
-        list.printList(head);
+        remove_duplicates(list.head);
+        printList(list.head);
+        
+        Node n = new Node(3);
+        n.next = new Node(5);
+        n.next.next = new Node(8);
+        n.next.next.next = new Node(5);
+        n.next.next.next.next = new Node(10);
+        n.next.next.next.next.next = new Node(2);
+        n.next.next.next.next.next.next = new Node(1);
+        
+        System.out.println();
+        printList(n);
+        //deleteNode(n.next.next);
+        n = partition(n, 5);
+        
+        System.out.println();
+        printList(n);
+        System.out.println();
+        Node a = new Node(7);
+        a.next = new Node(1);
+        a.next.next = new Node(7);
+        
+        Node b = new Node(5);
+        b.next = new Node(9);
+        b.next.next = new Node(2);
+        
+        
+        Node result = sumLists(a, b);
+        System.out.println("The sum is: ");
+        printList(result);
         System.out.println();
         
-        System.out.println("The nth to last node is: ");
-        nthLast(head, 2);
-        
+        Node c = new Node(5);
+        c.next = new Node(9);
+        c.next.next = new Node(6);
+        System.out.println("The palindrome is: " + palindrome(c));
         System.out.println();
-        delete(head.next);
-        System.out.println("After calling delete: ");
-        list.printList(head);
-        System.out.println();
-        System.out.println("After adding the two lists: ");
         
-        Node head2 = new Node(1);
-        head2.next = new Node(2);
-        head2.next.next= new Node(8);
+        System.out.println("The intersecting node is: ");
         
-        Node head3 = head2;
+        Node d = new Node(5);
+        d.next = new Node(9);
+        d.next.next = c;
         
-        list.printList(addTwoLists(head3, head2));
+        Node intersect = intersection(d, c);
+        printList(intersect);
+        
+        Node circle = new Node(5);
+        circle.next = new Node(9);
+        circle.next.next = new Node(6);
+        circle.next.next.next = new Node(7);
+        circle.next.next.next.next = new Node(8);
+        circle.next.next.next.next.next = circle.next.next.next;
+        System.out.println("The start of the circle is: " + circular(circle));
+        
     }
 }
